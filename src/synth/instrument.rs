@@ -2,7 +2,7 @@ use crate::synth::envelope::EnvelopeADSR;
 use crate::synth::osc;
 use rand::random;
 
-pub const BASE_A: f32 = 444.0;
+pub const BASE_A: f32 = 440.0;
 
 pub struct Note {
     pub value: u8,
@@ -53,7 +53,7 @@ impl<T: StandardInstrument> Instrument for T {
             None => return None
         };
 
-        let freq = 2f32.powf((note.value as f32 - 49.0) / 12.0) * BASE_A;
+        let freq = 2f32.powf((note.value as f32 - 69.0) / 12.0) * BASE_A;
 
         let osc_sample = <Self as StandardInstrument>::get_sample(self, freq, time);
 
@@ -70,9 +70,45 @@ impl StandardInstrument for Piano {
     const ENVELOPE: EnvelopeADSR = EnvelopeADSR {
         attack_time: 0.01,
         attack_amplitude: 1.0,
+        decay_time: 0.05,
+        sustain_amplitude: 0.6,
+        release_time: 0.03
+    };
+
+    fn get_sample(&self, freq: f32, time: f32) -> f32 {
+         // 0.7 * osc::triangle(osc::lfo(freq, time, osc::sin(5.00, time)), time)
+         // + 0.1 * osc::triangle(2.0 * freq, time)
+         // + 0.1 * osc::sin(4.0 * freq, time)
+         // + 0.1 * osc::sawtooth(0.5 * freq, time)
+
+         1.0 * (0.6 * osc::sawtooth(freq, time)
+             + 0.4 * osc::triangle(freq * 2.0, time)
+             )
+        
+ //       0.6 * osc::sawtooth(freq, time)
+ //             + 0.2 * osc::triangle(freq * 0.5, time)
+ //             + 0.2 * osc::triangle(freq * 2.0, time)
+
+        // osc::square(freq, time)
+        // 0.7 * osc::sawtooth(freq, time)
+        // + 0.2 * osc::triangle(freq * 2.0, time)
+        // + 0.05 * osc::square(freq * 0.249, time)
+        
+        //osc::triangle(freq, time)
+
+    }
+}
+
+pub struct B;
+impl StandardInstrument for B {
+    const NAME: &'static str = "B";
+
+    const ENVELOPE: EnvelopeADSR = EnvelopeADSR {
+        attack_time: 0.03,
+        attack_amplitude: 1.0,
         decay_time: 0.01,
         sustain_amplitude: 0.8,
-        release_time: 0.02
+        release_time: 0.03
     };
 
     fn get_sample(&self, freq: f32, time: f32) -> f32 {
@@ -81,23 +117,55 @@ impl StandardInstrument for Piano {
         // + 0.1 * osc::sin(4.0 * freq, time)
         // + 0.1 * osc::sawtooth(0.5 * freq, time)
 
-        // osc::sawtooth(freq, time)
-        //     + osc::sawtooth(freq * 0.5, time)
-        //     + osc::sawtooth(freq * 0.249, time)
+        1.0 * (0.3 * osc::square(freq, time)
+            + 0.3 * osc::triangle(freq * 0.5, time)
+            + 0.3 * osc::triangle(freq * 0.249, time)
+            + 0.2 * osc::sin(freq * 5.0, time))
 
-        0.7 * osc::sawtooth(osc::lfo(freq, time, 1.5* osc::sin( 2.0, time)), time)
-        + 0.1 * osc::sin(freq * 2.0, time)
-        + 0.15 * osc::triangle(freq * 0.249, time)
+        // 0.7 * osc::sawtooth(freq, time)
+        // + 0.2 * osc::triangle(freq * 2.0, time)
+        // + 0.05 * osc::square(freq * 0.249, time)
 
     }
 }
+
+pub struct C;
+impl StandardInstrument for C {
+    const NAME: &'static str = "C";
+
+    const ENVELOPE: EnvelopeADSR = EnvelopeADSR {
+        attack_time: 0.03,
+        attack_amplitude: 1.0,
+        decay_time: 0.01,
+        sustain_amplitude: 0.8,
+        release_time: 0.03
+    };
+
+    fn get_sample(&self, freq: f32, time: f32) -> f32 {
+        // 0.7 * osc::sawtooth(osc::lfo(freq, time, 1*osc::sin(5.00, time)), time)
+        // + 0.1 * osc::triangle(2.0 * freq, time)
+        // + 0.1 * osc::sin(4.0 * freq, time)
+        // + 0.1 * osc::sawtooth(0.5 * freq, time)
+
+        1.0 * (0.3 * osc::triangle(freq, time)
+            + 0.3 * osc::triangle(freq * 0.5, time)
+            + 0.3 * osc::triangle(freq * 0.249, time)
+            + 0.2 * osc::sin(freq * 5.0, time))
+
+        // 0.7 * osc::sawtooth(freq, time)
+        // + 0.2 * osc::triangle(freq * 2.0, time)
+        // + 0.05 * osc::square(freq * 0.249, time)
+
+    }
+}
+
 
 
 pub struct Brass;
 impl StandardInstrument for Brass {
     const NAME: &'static str = "Brass";
     const ENVELOPE: EnvelopeADSR = EnvelopeADSR {
-        attack_time: 0.2,
+        attack_time: 0.06,
         attack_amplitude: 1.0,
         decay_time: 0.3,
         sustain_amplitude: 0.7,
@@ -105,9 +173,9 @@ impl StandardInstrument for Brass {
     };
 
     fn get_sample(&self, freq: f32, time: f32) -> f32 {
-        osc::sawtooth(freq, time)
+        0.33 * (osc::sawtooth(freq, time)
         + osc::sawtooth(freq * 0.5, time)
-        + osc::sawtooth(freq * 0.249, time)
+        + osc::sawtooth(freq * 0.249, time))
     }
 }
 

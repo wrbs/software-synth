@@ -76,6 +76,7 @@ impl Source for Synth {
         for (time, msg) in to_handle {
             match msg {
                 Message::KeyDown { channel: c, note: n, velocity } => {
+                    println!("{:.2}: {:?}", time, msg);
                     assert!(c < 16);
                     self.notes.insert((c, n), Note {
                         value: n,
@@ -91,24 +92,28 @@ impl Source for Synth {
                         .and_modify(|e| e.end = Some(time));
                 },
                 Message::ProgramChange { channel: c, program} => {
+                    println!("{:.2}: {:?}", time, msg);
 
                     // Percussion, always (thanks GM)
                     if c != 9 /* channel 10 */ {
 
                         let instr: Box<dyn Instrument> = match program {
                             // Piano
+                            16 => Box::new(instrument::B),
+                            91 => Box::new(instrument::C),
                             60 => Box::new(instrument::Brass),
                             0..=7 => Box::new(instrument::Piano),
                             8..=127 => Box::new(instrument::Piano),
                             _ => panic!("unreachable"),
                         };
 
-                        println!("{:?} TO {}", msg, instr.name());
+                        // println!("{:?} TO {}", msg, instr.name());
 
                         self.channels[c as usize] = instr;
                     }
                 },
                 Message::VolumeChange { channel: c, volume} => {
+                    println!("{:.2}: {:?}", time, msg);
                     self.channel_volumes[c as usize] = (volume as f32 / 127.0)
                 }
             }

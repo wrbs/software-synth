@@ -95,5 +95,6 @@ impl Handler for MidiHandler {
 //    }
     fn track_change(&mut self) {
         self.t = 0.0;
+        // self.micros_per_quarter_note = 500000;
     }
 }
